@@ -1,34 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import {
+  countWithCoroutine,
+  createCountingTask
+} from './services/AsyncTasks';
+import {
+  isBackgroundTaskRegistered,
+  registerBackgroundTask,
+  unregisterBackgroundTask,
+} from './services/BackgroundService';
+import boundService from './services/BoundService';
+import {
+  startForegroundService,
+  stopForegroundService,
+} from './services/ForegroundService';
 
-// Import our services
-import {
-    countWithCoroutine,
-    createCountingTask
-} from '../../services/AsyncTasks';
-import {
-    isBackgroundTaskRegistered,
-    registerBackgroundTask,
-    unregisterBackgroundTask
-} from '../../services/BackgroundService';
-import boundService from '../../services/BoundService';
-import {
-    startForegroundService,
-    stopForegroundService
-} from '../../services/ForegroundService';
-
-export default function HomeScreen() {
-  // State variables
-  const [logs, setLogs] = useState<string[]>([]);
+export default function App() {
+  const [logs, setLogs] = useState([]);
   const [backgroundRunning, setBackgroundRunning] = useState(false);
   const [foregroundRunning, setForegroundRunning] = useState(false);
   const [boundRunning, setBoundRunning] = useState(false);
@@ -37,13 +34,11 @@ export default function HomeScreen() {
   const [coroutineProgress, setCoroutineProgress] = useState(0);
   const [isCoroutineRunning, setIsCoroutineRunning] = useState(false);
   
-  // Add a log entry
-  const addLog = (message: string) => {
+  const addLog = (message) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs(prevLogs => [`[${timestamp}] ${message}`, ...prevLogs.slice(0, 49)]);
   };
   
-  // Check if services are registered on mount
   useEffect(() => {
     const checkServices = async () => {
       try {
@@ -56,68 +51,61 @@ export default function HomeScreen() {
         
         addLog('App initialized');
       } catch (error) {
-        addLog(`Error checking services: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        addLog(`Error checking services: ${error.message}`);
       }
     };
     
     checkServices();
     
-    // Set up subscription to bound service count updates
-    const unsubscribe = boundService.subscribe((count: number) => {
+    const unsubscribe = boundService.subscribe((count) => {
       setBoundCount(count);
     });
     
     return () => {
-      // Clean up when component unmounts
       unsubscribe();
     };
   }, []);
 
-  // Start background task
   const handleStartBackground = async () => {
     try {
       const result = await registerBackgroundTask();
       setBackgroundRunning(result);
       addLog(result ? 'Background task started' : 'Failed to start background task');
     } catch (error) {
-      addLog(`Error starting background task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      addLog(`Error starting background task: ${error.message}`);
     }
   };
 
-  // Stop background task
   const handleStopBackground = async () => {
     try {
       await unregisterBackgroundTask();
       setBackgroundRunning(false);
       addLog('Background task stopped');
     } catch (error) {
-      addLog(`Error stopping background task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      addLog(`Error stopping background task: ${error.message}`);
     }
   };
 
-  // Start foreground service
   const handleStartForeground = async () => {
     try {
       const result = await startForegroundService();
       setForegroundRunning(result);
       addLog(result ? 'Foreground service started' : 'Failed to start foreground service');
     } catch (error) {
-      addLog(`Error starting foreground service: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      addLog(`Error starting foreground service: ${error.message}`);
     }
   };
 
-  // Stop foreground service
   const handleStopForeground = async () => {
     try {
       await stopForegroundService();
       setForegroundRunning(false);
       addLog('Foreground service stopped');
     } catch (error) {
-      addLog(`Error stopping foreground service: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      addLog(`Error stopping foreground service: ${error.message}`);
     }
   };
 
-  // Bind to service
   const handleBindService = () => {
     try {
       if (!boundRunning) {
@@ -131,23 +119,20 @@ export default function HomeScreen() {
         addLog('Unbound from service');
       }
     } catch (error) {
-      addLog(`Error binding to service: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      addLog(`Error binding to service: ${error.message}`);
     }
   };
 
-  // Run AsyncTask
   const handleRunAsyncTask = () => {
     addLog('Starting AsyncTask...');
     setAsyncTaskProgress(0);
     
     const task = createCountingTask(
-      // onProgress
-      ({ progress, currentCount }: { progress: number; currentCount: number }) => {
+      ({ progress, currentCount }) => {
         setAsyncTaskProgress(progress);
         addLog(`AsyncTask progress: ${progress}%, count: ${currentCount}`);
       },
-      // onComplete
-      (results: any[]) => {
+      (results) => {
         addLog(`AsyncTask completed with ${results.length} counts`);
       }
     );
@@ -155,7 +140,6 @@ export default function HomeScreen() {
     task.execute(20);
   };
 
-  // Run Coroutine
   const handleRunCoroutine = async () => {
     if (isCoroutineRunning) {
       addLog('Coroutine is already running');
@@ -167,14 +151,12 @@ export default function HomeScreen() {
     setIsCoroutineRunning(true);
     
     const coroutine = await countWithCoroutine(
-      10, // maxCount
-      // onProgress
-      ({ progress, currentCount }: { progress: number; currentCount: number }) => {
+      10,
+      ({ progress, currentCount }) => {
         setCoroutineProgress(progress);
         addLog(`Coroutine progress: ${progress}%, count: ${currentCount}`);
       },
-      // onComplete
-      (results: any[]) => {
+      (results) => {
         addLog(`Coroutine completed with ${results.length} counts`);
         setIsCoroutineRunning(false);
       }
@@ -190,7 +172,6 @@ export default function HomeScreen() {
       
       <View style={styles.buttonsContainer}>
         <View style={styles.row}>
-          {/* Background Task Button */}
           <TouchableOpacity 
             style={[styles.button, backgroundRunning ? styles.stopButton : styles.startButton]} 
             onPress={backgroundRunning ? handleStopBackground : handleStartBackground}
@@ -202,7 +183,6 @@ export default function HomeScreen() {
         </View>
         
         <View style={styles.row}>
-          {/* Foreground Service Button */}
           <TouchableOpacity 
             style={[styles.button, foregroundRunning ? styles.stopButton : styles.startButton]} 
             onPress={foregroundRunning ? handleStopForeground : handleStartForeground}
@@ -214,7 +194,6 @@ export default function HomeScreen() {
         </View>
         
         <View style={styles.row}>
-          {/* Bound Service Button */}
           <TouchableOpacity 
             style={[styles.button, boundRunning ? styles.stopButton : styles.startButton]} 
             onPress={handleBindService}
@@ -232,7 +211,6 @@ export default function HomeScreen() {
         </View>
         
         <View style={styles.row}>
-          {/* AsyncTask Button */}
           <TouchableOpacity 
             style={[styles.button, styles.taskButton]} 
             onPress={handleRunAsyncTask}
@@ -247,7 +225,6 @@ export default function HomeScreen() {
         </View>
         
         <View style={styles.row}>
-          {/* Coroutine Button */}
           <TouchableOpacity 
             style={[styles.button, styles.taskButton, isCoroutineRunning && styles.disabledButton]} 
             onPress={handleRunCoroutine}
@@ -379,4 +356,4 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
-});
+}); 

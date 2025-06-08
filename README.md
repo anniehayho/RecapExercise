@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+# Background Services Demo
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native Expo application demonstrating background tasks, foreground services, and bound services.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Background Task**: Demonstrates running a task in the background using Expo's TaskManager.
+- **Foreground Service**: Shows a notification and performs a task while the app is in the foreground or background.
+- **Bound Service**: Allows the UI to interact with a service and get real-time updates.
+- **AsyncTask**: Simulates Android's AsyncTask for synchronous operations.
+- **Coroutines**: Demonstrates asynchronous tasks similar to Kotlin Coroutines.
 
-   ```bash
-   npm install
-   ```
+## Prerequisites
 
-2. Start the app
+- [Node.js](https://nodejs.org/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- [Android Studio](https://developer.android.com/studio) (for Android development)
+- [Xcode](https://developer.apple.com/xcode/) (for iOS development, macOS only)
 
-   ```bash
-   npx expo start
-   ```
+## Installation
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Clone the repository (or download the source code)
+2. Install dependencies:
 
 ```bash
-npm run reset-project
+cd BackgroundServiceApp
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Running the App
 
-## Learn more
+Start the Expo development server:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Then:
+- Press `a` to open the app in an Android emulator
+- Press `i` to open the app in an iOS simulator (macOS only)
+- Scan the QR code with the Expo Go app on your physical device
 
-## Join the community
+## Important Notes
 
-Join our community of developers creating universal apps.
+- Background tasks in Expo have limitations. In a production environment, background tasks are only allowed to run at minimum intervals of 15 minutes.
+- Foreground services with notifications require proper permissions, especially on Android.
+- On iOS, background capabilities are more restricted than on Android.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Structure
+
+- `services/` - Contains service implementations
+  - `BackgroundService.js` - Implementation of background tasks
+  - `ForegroundService.js` - Implementation of foreground service with notifications
+  - `BoundService.js` - Implementation of a bound service
+  - `AsyncTasks.js` - Implementation of AsyncTask and Coroutine equivalents
+- `models/` - Data models
+  - `Alarm.js` - Simple model for alarm data
+- `App.js` - Main application component with UI
+
+## Learning Objectives
+
+This app demonstrates:
+1. How to implement background processing in React Native
+2. Working with notifications for foreground services
+3. Creating a service that can be bound to by UI components
+4. Synchronous vs asynchronous task handling
